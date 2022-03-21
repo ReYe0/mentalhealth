@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.study.admin.dao.UserDao">
+
+    <resultMap id="BaseResultMap" type="com.study.admin.entities.User">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="account" property="account" jdbcType="VARCHAR"/>
+        <result column="password" property="password" jdbcType="VARCHAR"/>
+        <result column="avatar_url" property="avatarUrl" jdbcType="VARCHAR"/>
+
+    </resultMap>
+    <!--    useGeneratedKeys这个只在insert语句中有效，正常情况下useGeneratedKeys默认为false
+    当useGeneratedKeys为true时，如果插入的表id以自增列为主键时，将会把该自增id返回。
+
+    keyProperty 一般都是结合数据库自动生成主键来使用，由于是数据库生成的主键，
+    所以在这个对象持久化到数据库之前是对象中的这个属性是没有属性值的，但是在持久化之后又想使用这个主键， 出现这样的情况时可以keyProperty="id"
+    -->
+
+    <select id="login" parameterType="string" resultMap="BaseResultMap">
+        select * from tb_user where account = #{account} and password = #{password};
+    </select>
+
+    <insert id="create" parameterType="com.study.admin.entities.User" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO tb_admin(admin_name,account,password) VALUES(#{adminName},#{account},#{password});
+    </insert>
+
+    <select id="getUserById" parameterType="integer" resultMap="BaseResultMap" >
+        SELECT * FROM tb_user WHERE id=#{id};
+    </select>
+    <update id="updateAdminById" parameterType="com.study.admin.entities.User">
+        update tb_admin set avatar_url = #{user.avatarUrl} where id = #{id};
+    </update>
+
+</mapper>
+
+
+
+
+

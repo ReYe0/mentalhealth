@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.study.admin.dao.FilesDao">
+
+    <resultMap id="BaseResultMap" type="com.study.admin.entities.Files">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="is_delete" property="isDelete" jdbcType="VARCHAR"/>
+<!--        <result column="account" property="account" jdbcType="VARCHAR"/>-->
+<!--        <result column="password" property="password" jdbcType="VARCHAR"/>-->
+<!--        <result column="avatar_url" property="avatarUrl" jdbcType="VARCHAR"/>-->
+
+    </resultMap>
+    <insert id="insert" parameterType="com.study.admin.entities.Files" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO tb_file(name ,type ,size,url,md5) VALUES(#{name},#{type},#{size},#{url},#{md5});
+    </insert>
+    <select id="findByMd5" resultType="com.study.admin.entities.Files">
+        select * from tb_file where md5 = #{md5};
+    </select>
+    <select id="findById" resultType="com.study.admin.entities.Files">
+        select * from tb_file where id = #{id};
+    </select>
+    <update id="updateIsDeleteById">
+        update tb_file set is_delete  = #{isDelete} where id = #{id};
+    </update>
+    <select id="selectPage" resultMap="BaseResultMap">
+        select * from tb_file where is_delete = false and name like concat('%',#{name},'%') limit #{pageNum},#{pageSize};
+    </select>
+    <select id="selectTotal" parameterType="integer" resultType="integer">
+        select count(*) from tb_file where is_delete = 0;
+    </select>
+    <update id="deleteBatchFiles">
+        update tb_file set is_delete = true where id in
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id,jdbcType=BIGINT}
+        </foreach>
+    </update>
+
+    <update id="updateEnableById">
+        update tb_file set enable = #{enable} where id = #{id};
+    </update>
+
+</mapper>
+
+
+
+
+

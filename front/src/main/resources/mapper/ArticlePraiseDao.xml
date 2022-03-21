@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.study.front.dao.ArticlePraiseDao">
+
+    <resultMap id="BaseResultMap" type="com.study.front.entities.ArticlePraise">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="article_id" property="articleId" jdbcType="BIGINT"/>
+        <result column="user_id" property="userId" jdbcType="BIGINT"/>
+        <result column="create_time" property="createTime" jdbcType="VARCHAR"/>
+
+    </resultMap>
+    <select id="findPraiseNumByUserId" resultType="integer">
+        select count(*) from tb_praise where user_id = #{userId}
+    </select>
+    <delete id="delPraise">
+        delete from tb_praise where user_id = #{userId} and article_id = #{articleId};
+    </delete>
+    <insert id="toPraise" >
+        insert into tb_praise (user_id,article_id) values (#{userId},#{articleId});
+    </insert>
+    <select id="isPraiseByUserIdAndArticleId" resultType="integer">
+        select count(*) from tb_praise where user_id = #{userId} and article_id = #{articleId};
+    </select>
+    <select id="findPraiseNum" resultType="integer">
+        select count(*) from tb_praise where article_id = #{articleId};
+    </select>
+    <insert id="insertArticle" parameterType="com.study.front.entities.Article" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO tb_article(user_id,class_id,title,content,file_id,is_share) VALUES(#{userId},#{classId},#{title},#{content},#{fileId},#{isShare});
+    </insert>
+
+
+    <!--    <select id="getAdminUserById" parameterType="integer" resultMap="BaseResultMap" >-->
+    <!--        SELECT * FROM tb_admin WHERE id=#{id};-->
+    <!--    </select>-->
+    <!--    <update id="updateAdminById" parameterType="com.study.admin.entities.User">-->
+    <!--        update tb_admin set avatar_url = #{user.avatarUrl} where id = #{id};-->
+    <!--    </update>-->
+
+</mapper>
+
+
+
+
+

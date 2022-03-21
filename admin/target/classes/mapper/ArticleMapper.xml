@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.study.admin.dao.ArticleDao">
+
+    <resultMap id="BaseResultMap" type="com.study.admin.entities.Article">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="user_id" property="userId" jdbcType="BIGINT"/>
+        <result column="class_id" property="classId" jdbcType="BIGINT"/>
+        <result column="title" property="title" jdbcType="VARCHAR"/>
+        <result column="content" property="content" jdbcType="VARCHAR"/>
+        <result column="file_id" property="fileId" jdbcType="BIGINT"/>
+        <result column="is_share" property="isShare" jdbcType="VARCHAR"/>
+        <result column="is_look" property="isLook" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="VARCHAR"/>
+
+    </resultMap>
+    <resultMap id="ArticleResultMap" type="com.study.admin.controller.dto.admin.ArticleResponse">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="user_id" property="userId" jdbcType="BIGINT"/>
+        <result column="title" property="title" jdbcType="BIGINT"/>
+        <result column="class_id" property="classId" jdbcType="BIGINT"/>
+        <result column="content" property="content" jdbcType="LONGVARCHAR"/>
+        <result column="url" property="url" jdbcType="BIGINT"/>
+        <result column="is_share" property="isShare" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="VARCHAR"/>
+
+    </resultMap>
+    <!--    useGeneratedKeys这个只在insert语句中有效，正常情况下useGeneratedKeys默认为false
+    当useGeneratedKeys为true时，如果插入的表id以自增列为主键时，将会把该自增id返回。
+
+    keyProperty 一般都是结合数据库自动生成主键来使用，由于是数据库生成的主键，
+    所以在这个对象持久化到数据库之前是对象中的这个属性是没有属性值的，但是在持久化之后又想使用这个主键， 出现这样的情况时可以keyProperty="id"
+    -->
+    <delete id="delArticleById">
+        delete from tb_article where id = #{id}
+    </delete>
+    <select id="updateShare" resultType="integer">
+        update tb_article set is_share = #{share} where id = #{id};
+    </select>
+    <select id="findArticleList" resultMap="ArticleResultMap">
+        SELECT a.id,d.name,a.user_id,a.is_share,a.class_id,a.title,a.content,a.create_time,b.url
+        FROM tb_article a inner join tb_file b on b.id = a.file_id inner join tb_article_class c on c.id = a.class_id
+                          inner join tb_user d on d.id = a.user_id
+        where a.is_share != 0 and a.title like concat('%',#{title},'%') order by create_time desc limit #{pageNum},#{pageSize} ;
+    </select>
+    <select id="selectTotal" resultType="integer">
+        select count(*) from tb_article where title like concat('%',#{title},'%');
+    </select>
+    <select id="findArticleByClass" resultMap="BaseResultMap">
+        select * from tb_article where class_id = #{classId} and id != #{articleId}
+    </select>
+    <update id="updateArticleById">
+        update tb_article set is_look = #{lookNum} where id = #{id};
+    </update>
+    <select id="findById" resultMap="BaseResultMap">
+        SELECT * from tb_article where id = #{id}
+    </select>
+
+    <select id="findAllByClassId" resultMap="ArticleResultMap">
+        SELECT a.id,a.user_id,a.title,a.content,a.create_time,b.url
+        FROM tb_article a inner join tb_file b on b.id = a.file_id inner join tb_article_class c on c.id = a.class_id where class_id = #{classId}  and is_share = 1
+    </select>
+
+    <!--    <select id="getAdminUserById" parameterType="integer" resultMap="BaseResultMap" >-->
+    <!--        SELECT * FROM tb_admin WHERE id=#{id};-->
+    <!--    </select>-->
+    <!--    <update id="updateAdminById" parameterType="com.study.admin.entities.User">-->
+    <!--        update tb_admin set avatar_url = #{user.avatarUrl} where id = #{id};-->
+    <!--    </update>-->
+
+</mapper>
+
+
+
+
+

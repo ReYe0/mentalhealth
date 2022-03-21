@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.study.admin.dao.RoleMenuDao">
+    <resultMap id="BaseResultMap" type="com.study.admin.entities.RoleMenu">
+        <id column="role_id" property="roleId" jdbcType="BIGINT"/>
+        <id column="menu_id" property="menuId" jdbcType="BIGINT"/>
+
+    </resultMap>
+    <delete id="deleteByRoleId">
+        delete from tb_role_menu where role_id = #{roleId};
+    </delete>
+    <insert id="insert" >
+        INSERT INTO tb_role_menu(role_id ,menu_id) VALUES(#{roleId},#{menuId});
+    </insert>
+    <select id="getRoleMenu" parameterType="integer" resultType="int">
+        select menu_id from tb_role_menu where role_id = #{roleId};
+    </select>
+
+</mapper>
+
+
+
+
+

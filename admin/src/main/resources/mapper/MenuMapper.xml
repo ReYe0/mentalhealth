@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.study.admin.dao.MenuDao">
+    <resultMap id="BaseResultMap" type="com.study.admin.entities.Menu">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="path" property="path" jdbcType="VARCHAR"/>
+        <result column="icon" property="icon" jdbcType="VARCHAR"/>
+        <result column="description" property="description" jdbcType="VARCHAR"/>
+        <result column="page_path" property="pagePath" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="pid" property="pid" jdbcType="BIGINT"/>
+    </resultMap>
+    <select id="getById" resultMap="BaseResultMap">
+        select * from tb_menu where id =#{id};
+    </select>
+    <select id="findMenuOne" resultMap="BaseResultMap">
+        select * from tb_menu where pid = null;
+    </select>
+    <select id="findAll" resultMap="BaseResultMap">
+        select * from tb_menu where name like concat('%',#{name},'%') order by id asc;
+    </select>
+    <insert id="addMenu" >
+        INSERT INTO tb_menu(name ,path,icon,description,pid,page_path) VALUES(#{name},#{path},#{icon},#{description},#{pid},#{pagePath});
+    </insert>
+    <update id="updateMenu">
+        update tb_menu set name=#{name},path=#{path},icon=#{icon},description=#{description},page_path=#{pagePath} where id = #{id};
+    </update>
+
+    <select id="selectPage" resultMap="BaseResultMap">
+        select * from tb_menu where name like concat('%',#{name},'%') order by create_time desc limit #{pageNum},#{pageSize} ;
+    </select>
+    <select id="selectTotal" resultType="integer">
+        select count(*) from tb_menu where name like concat('%',#{name},'%');
+    </select>
+    <delete id="deleteById">
+        delete from tb_menu where id = #{id};
+    </delete>
+    <delete id="deleteBatchMenu">
+        delete from tb_menu where id in
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id,jdbcType=BIGINT}
+        </foreach>
+    </delete>
+
+</mapper>
+
+
+
+
+
