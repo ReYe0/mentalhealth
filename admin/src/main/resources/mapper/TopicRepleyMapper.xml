@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.study.admin.dao.TopicReplyDao">
+
+    <resultMap id="BaseResultMap" type="com.study.admin.entities.TopicReply">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <id column="topic_id" property="topicId" jdbcType="BIGINT"/>
+        <id column="user_id" property="userId" jdbcType="BIGINT"/>
+        <result column="content" property="content" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="VARCHAR"/>
+        <result column="reply_type" property="replyType" jdbcType="TINYINT"/>
+
+    </resultMap>
+    <resultMap id="ReplyResultMap" type="com.study.admin.controller.dto.TopicReplyResponse">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <id column="user_id" property="userId" jdbcType="BIGINT"/>
+        <id column="topic_user_id" property="topicUserId" jdbcType="BIGINT"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="avatar_url" property="avatarUrl" jdbcType="VARCHAR"/>
+        <result column="content" property="content" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="VARCHAR"/>
+        <result column="staff_name" property="staffName" jdbcType="VARCHAR"/>
+        <result column="admin_url" property="adminUrl" jdbcType="VARCHAR"/>
+        <result column="reply_type" property="replyType" jdbcType="TINYINT"/>
+        <result column="praise_count" property="praiseCount" jdbcType="INTEGER"/>
+        <result column="is_praise" property="isPraise" jdbcType="INTEGER"/>
+        <result column="comment_count" property="commentCount" jdbcType="INTEGER"/>
+
+    </resultMap>
+
+    <select id="findAllReply" resultMap="ReplyResultMap">
+        select distinct a.id,b.name,b.avatar_url,a.create_time,a.content,a.reply_type,c.staff_name,c.avatar_url as admin_url,a.user_id,d.user_id as topic_user_id,
+                        (select distinct count(*) from tb_topic_reply_praise where topic_reply_id= a.id) as praise_count,
+                        (select distinct count(*) from tb_topic_reply_praise where topic_reply_id= a.id and user_id = #{userId} and user_type = 0) as is_praise,
+                        (select distinct count(*) from tb_topic_reply_comment where topic_reply_id= a.id) as comment_count
+        from tb_topic_reply a inner join tb_user b on b.id = a.user_id
+                              left join tb_staff c on c.id = a.user_id
+                              left join tb_topic d on d.id = a.topic_id
+                              left join tb_topic_reply_praise e on e.topic_reply_id = a.id
+                              left join tb_topic_reply_comment f on f.topic_reply_id = a.id
+        where a.topic_id = #{topicId} order by a.create_time desc
+    </select>
+    <insert id="insertReply" parameterType="com.study.admin.entities.TopicReply" useGeneratedKeys="true" keyProperty="id">
+        insert into tb_topic_reply(topic_id,user_id,content,reply_type) values (#{topicId},#{userId},#{content},#{replyType})
+    </insert>
+
+
+</mapper>
+
+
+
+
+

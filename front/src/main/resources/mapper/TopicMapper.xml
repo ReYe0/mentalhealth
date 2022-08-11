@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.study.front.dao.TopicDao">
+
+    <resultMap id="BaseResultMap" type="com.study.front.entities.Topic">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <id column="user_id" property="userId" jdbcType="BIGINT"/>
+<!--        <id column="class_id" property="classId" jdbcType="BIGINT"/>-->
+        <result column="title" property="title" jdbcType="VARCHAR"/>
+        <result column="content" property="content" jdbcType="VARCHAR"/>
+        <result column="is_anonymous" property="isAnonymous" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="VARCHAR"/>
+        <result column="avatar_url" property="avatarUrl" jdbcType="VARCHAR"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="is_look" property="isLook" jdbcType="BIGINT"/>
+        <result column="reply_count" property="replyCount" jdbcType="INTEGER"/>
+
+    </resultMap>
+    <resultMap id="classResultMap" type="com.study.front.entities.ArticleClass">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="class_name" property="className" jdbcType="VARCHAR"/>
+
+    </resultMap>
+    <resultMap id="userReplyListResultMap" type="com.study.front.controller.dto.MyTopicReplyResponse">
+        <id column="topic_id" property="topicId" jdbcType="BIGINT"/>
+        <result column="title" property="title" jdbcType="VARCHAR"/>
+        <result column="content" property="content" jdbcType="VARCHAR"/>
+        <result column="is_look" property="isLook" jdbcType="INTEGER"/>
+        <result column="create_time" property="createTime" jdbcType="VARCHAR"/>
+
+    </resultMap>
+    <select id="getNotice" resultType="string">
+        select content from tb_notice
+    </select>
+    <select id="getStaffReplyList" resultMap="userReplyListResultMap">
+        select a.topic_id,b.title,a.content,a.create_time,b.is_look
+        from tb_topic_reply a left join tb_topic b on b.id = a.topic_id
+        where a.reply_type = 1 and a.user_id  = #{staffId}
+    </select>
+    <select id="userReplyList" resultMap="userReplyListResultMap">
+        select
+            a.topic_id,c.title,a.content,c.is_look,a.create_time
+        from tb_topic_reply a left join tb_user b on b.id = a.user_id
+                              left join tb_topic c on c.id = a.topic_id
+        where a.reply_type  = 0 and a.user_id = #{userId} order by a.create_time desc
+    </select>
+    <update id="updateLookNum">
+        update tb_topic set is_look = #{lookNum} where id = #{topicId}
+    </update>
+    <select id="loadTopicLookNum" resultType="integer">
+        select is_look from tb_topic where id = #{topicId}
+    </select>
+    <select id="totalTopicNum" resultType="integer">
+        select count(*) from tb_topic where user_id = #{userId}
+    </select>
+    <select id="totalReplyNum" resultType="integer">
+        select count(*) from tb_topic_reply where user_id = #{userId} and reply_type = 0
+    </select>
+    <select id="totalTopicReplyPraiseNum" resultType="integer">
+        select count(*) from tb_topic_reply_praise a left join tb_topic_reply b on b.id = a.topic_reply_id where b.user_id = #{userId}
+                                                                                                             and b.reply_type = 0
+    </select>
+    <select id="judgeIsCollect" resultType="integer">
+        select count(*) from tb_topic_collect where topic_id = #{topicId} and user_id = #{userId} and user_type = 1
+    </select>
+    <select id="judgeIsHug" resultType="integer">
+        select count(*) from tb_topic_hug where topic_id = #{topicId} and user_id = #{userId} and user_type = 1
+    </select>
+    <select id="collectNum" resultType="integer">
+        select count(*) from tb_topic_collect where topic_id=#{topicId};
+    </select>
+    <select id="hugNum" resultType="integer">
+        select count(*) from tb_topic_hug where topic_id=#{topicId};
+    </select>
+    <delete id="delPraise">
+        delete from tb_topic_reply_praise where topic_reply_id = #{topicReplyId} and user_id = #{userId} and user_type = 1
+    </delete>
+    <delete id="delCollect">
+        delete from tb_topic_collect where topic_id = #{topicId} and user_id = #{userId} and user_type = 1
+    </delete>
+    <delete id="delHug">
+        delete from tb_topic_hug where topic_id = #{topicId} and user_id = #{userId} and user_type = 1
+    </delete>
+    <insert id="toPraise" >
+        insert into tb_topic_reply_praise(topic_reply_id,user_id,user_type) values (#{topicReplyId},#{userId},1);
+    </insert>
+    <insert id="toCollect" >
+        insert into tb_topic_collect(topic_id,user_id,user_type) values (#{topicId},#{userId},1);
+    </insert>
+    <insert id="toHug" >
+        insert into tb_topic_hug(topic_id,user_id,user_type) values (#{topicId},#{userId},1);
+    </insert>
+    <select id="findAllTopicClass" resultMap="classResultMap">
+        select a.topic_id as id,b.class_name from tb_topic_class_link a inner join tb_article_class b on b.id = a.class_id
+    </select>
+    <select id="findTopicByTitle" resultMap="BaseResultMap">
+        select distinct a.id,a.user_id,a.title,a.content,a.is_anonymous,a.create_time,a.is_look,b.name,b.avatar_url,
+                        (select distinct count(*) from tb_topic_reply where topic_id= a.id) as reply_count
+        from tb_topic a inner join tb_user b on b.id = a.user_id
+                        left join tb_topic_reply c on c.topic_id = a.id
+        where a.title like concat('%',#{topicTitle},'%')
+        order by reply_count desc
+    </select>
+    <select id="userTopicCollectList" resultMap="BaseResultMap">
+        select distinct a.id,a.user_id,a.title,a.content,a.is_anonymous,a.create_time,a.is_look,b.name,b.avatar_url,
+                        (select distinct count(*) from tb_topic_reply where topic_id= a.id) as reply_count
+        from tb_topic a inner join tb_user b on b.id = a.user_id
+                        left join tb_topic_reply c on c.topic_id = a.id
+                        inner join tb_topic_collect d on d.topic_id = a.id
+        where a.user_id = #{userId} and d.user_type = 1
+        order by reply_count desc
+    </select>
+    <select id="userTopicList" resultMap="BaseResultMap">
+        select distinct a.id,a.user_id,a.title,a.content,a.is_anonymous,a.create_time,a.is_look,b.name,b.avatar_url,
+                        (select distinct count(*) from tb_topic_reply where topic_id= a.id) as reply_count
+        from tb_topic a inner join tb_user b on b.id = a.user_id
+                        left join tb_topic_reply c on c.topic_id = a.id
+        where a.user_id = #{userId}
+        order by reply_count desc
+    </select>
+    <select id="findAllByReplyCount" resultMap="BaseResultMap">
+        select distinct a.id,a.user_id,a.title,a.content,a.is_anonymous,a.create_time,a.is_look,b.name,b.avatar_url,
+                        (select distinct count(*) from tb_topic_reply where topic_id= a.id) as reply_count
+        from tb_topic a inner join tb_user b on b.id = a.user_id
+                        left join tb_topic_reply c on c.topic_id = a.id
+        order by reply_count desc
+    </select>
+    <select id="findAll" resultMap="BaseResultMap">
+        select distinct a.id,a.user_id,a.title,a.content,a.is_anonymous,a.create_time,a.is_look,b.name,b.avatar_url,
+                        (select distinct count(*) from tb_topic_reply where topic_id= a.id) as reply_count
+        from tb_topic a inner join tb_user b on b.id = a.user_id
+                        left join tb_topic_reply c on c.topic_id = a.id
+        order by a.create_time desc
+    </select>
+    <select id="findClassByTopicId" resultMap="classResultMap">
+        select c.id,c.class_name
+        from tb_topic a inner join tb_topic_class_link b on b.topic_id = a.id
+                        inner join tb_article_class c on c.id = b.class_id where a.id = #{topicId}
+    </select>
+    <select id="findTopicById" resultMap="BaseResultMap">
+        select a.id as id,a.user_id,a.title,a.content,a.is_anonymous,a.create_time,a.is_look,b.name,b.avatar_url
+        from tb_topic a inner join  tb_user b on b.id = a.user_id where a.id = #{topicId}
+    </select>
+
+    <insert id="insertClass">
+        insert  into tb_topic_class_link(topic_id,class_id) values (#{topicId},#{classId})
+    </insert>
+    <insert id="insertTopic" parameterType="com.study.front.entities.Topic" useGeneratedKeys="true" keyProperty="id">
+        insert into tb_topic(user_id,title,content,is_anonymous) values (#{userId},#{title},#{content},#{isAnonymous})
+    </insert>
+
+
+</mapper>
+
+
+
+
+

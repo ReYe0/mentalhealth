@@ -5,6 +5,9 @@ import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
 import com.study.admin.common.CommonResult;
 import com.study.admin.controller.dto.StaffRequest;
+import com.study.admin.dao.StaffDao;
+import com.study.admin.entities.ArticleClass;
+import com.study.admin.entities.ConsultCity;
 import com.study.admin.entities.Staff;
 import com.study.admin.service.StaffService;
 import com.study.admin.utils.TokenUtil;
@@ -34,23 +37,49 @@ public class StaffController {
 
     @Resource
     private StaffService staffService;
+    @Resource
+    private StaffDao staffDao;
 
+    //获取主页信息
+    @GetMapping(value = "/homeDetail")
+    public CommonResult homeDetail(){
+        Integer userNum = staffDao.getUserNum();
+        Integer consultNum = staffDao.getConsultNum();
+        Integer psychologyNum = staffDao.getPsychologyNum();
+        Integer staffNum = staffDao.getStaffNum();
+        HashMap<Object, Object> res = new HashMap<>();
+        res.put("userNum",userNum);
+        res.put("consultNum",consultNum);
+        res.put("psychologyNum",psychologyNum);
+        res.put("staffNum",staffNum);
+        return CommonResult.success(res);
+    }
     //登陆
     @RequestMapping(value = "/login",method = RequestMethod.POST)
     public CommonResult Login(@RequestBody Staff staff, StaffRequest staffRequest){
         StaffRequest response = staffService.login(staff,staffRequest);
+        Integer staffId = response.getId();
+        Staff roleStaff = staffDao.getStaffById(staffId);
+        response.setRole(roleStaff.getRole());
+        response.setStaffName(roleStaff.getStaffName());
         return CommonResult.success(response);
     }
     //用户信息
     @GetMapping(value = "/get/{id}")
     public CommonResult getStaffById(@PathVariable("id") Integer id){
         Staff staff = staffService.getStaffById(id);
+        List<ArticleClass> consultClassAll = staffDao.getConsultClassAll();
+        List<ConsultCity> consultCityALl = staffDao.getConsultCityALl();
+        Map<String,Object> res = new HashMap<>();
+        res.put("consultClassAll",consultClassAll);
+        res.put("consultCityALl",consultCityALl);
+        res.put("staff",staff);
         log.info("***查询结果："+staff);
-        if(staff != null){
-            return CommonResult.success(staff);
-        }else {
-            return CommonResult.error();
-        }
+//        if(staff != null){
+            return CommonResult.success(res);
+//        }else {
+//            return CommonResult.error();
+//        }
     }
     //保存用户信息
     @PostMapping(value = "/login/save")
@@ -117,12 +146,12 @@ public class StaffController {
         Map<String,Object> res = new HashMap<>();
         res.put("staffList",staff);
         res.put("total",total);
+        List<ArticleClass> consultClassAll = staffDao.getConsultClassAll();
+        List<ConsultCity> consultCityALl = staffDao.getConsultCityALl();
+        res.put("consultClassAll",consultClassAll);
+        res.put("consultCityALl",consultCityALl);
 //        TokenUtil.getCurrentAdminUser();
-        if(total > 0){
             return CommonResult.success(res);
-        }else{
-            return CommonResult.error();
-        }
     }
 //    导出接口
     @GetMapping("/export")

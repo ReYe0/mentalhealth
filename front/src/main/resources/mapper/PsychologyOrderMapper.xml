@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.study.front.dao.PsychologyOrderDao">
+
+    <resultMap id="BaseResultMap" type="com.study.front.entities.PsychologyClass">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="class_name" property="className" jdbcType="BIGINT"/>
+    </resultMap>
+    <resultMap id="psychologyListResultMap" type="com.study.front.entities.PsychologyOrderQuestion">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <id column="class_id" property="classId" jdbcType="BIGINT"/>
+        <id column="staff_id" property="staffId" jdbcType="BIGINT"/>
+        <id column="file_id" property="fileId" jdbcType="BIGINT"/>
+        <result column="title" property="title" jdbcType="VARCHAR"/>
+        <result column="is_sale" property="isSale" jdbcType="TINYINT"/>
+        <result column="is_free" property="isFree" jdbcType="VARCHAR"/>
+        <result column="price" property="price" jdbcType="DECIMAL"/>
+        <result column="description" property="description" jdbcType="VARCHAR"/>
+        <result column="a_score_total" property="AScoreTotal" jdbcType="VARCHAR"/>
+        <result column="b_score_total" property="BScoreTotal" jdbcType="VARCHAR"/>
+        <result column="c_score_total" property="CScoreTotal" jdbcType="VARCHAR"/>
+        <result column="d_score_total" property="DScoreTotal" jdbcType="VARCHAR"/>
+        <result column="e_score_total" property="EScoreTotal" jdbcType="VARCHAR"/>
+        <result column="a_result" property="AResult" jdbcType="VARCHAR"/>
+        <result column="ab_result" property="ABResult" jdbcType="VARCHAR"/>
+        <result column="bc_result" property="BCResult" jdbcType="VARCHAR"/>
+        <result column="cd_result" property="CDResult" jdbcType="VARCHAR"/>
+        <result column="de_result" property="DEResult" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="VARCHAR"/>
+
+        <result column="staff_name" property="staffName" jdbcType="VARCHAR"/>
+        <result column="url" property="url" jdbcType="VARCHAR"/>
+        <result column="already_check" property="alreadyCheck" jdbcType="VARCHAR"/>
+        <result column="already_comment" property="alreadyComment" jdbcType="VARCHAR"/>
+        <result column="check_result" property="checkResult" jdbcType="VARCHAR"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+    </resultMap>
+    <resultMap id="psychologySonListResultMap" type="com.study.front.entities.PsychologyOrderQuestionSon">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <id column="parent_id" property="parentId" jdbcType="BIGINT"/>
+        <result column="son_title" property="sonTitle" jdbcType="VARCHAR"/>
+        <result column="a_option" property="AOption" jdbcType="VARCHAR"/>
+        <result column="b_option" property="BOption" jdbcType="VARCHAR"/>
+        <result column="c_option" property="COption" jdbcType="VARCHAR"/>
+        <result column="d_option" property="DOption" jdbcType="VARCHAR"/>
+        <result column="e_option" property="EOption" jdbcType="VARCHAR"/>
+        <result column="a_score" property="AScore" jdbcType="VARCHAR"/>
+        <result column="b_score" property="BScore" jdbcType="VARCHAR"/>
+        <result column="c_score" property="CScore" jdbcType="VARCHAR"/>
+        <result column="d_score" property="DScore" jdbcType="VARCHAR"/>
+        <result column="e_score" property="EScore" jdbcType="VARCHAR"/>
+    </resultMap>
+    <resultMap id="psychologyCommentListResultMap" type="com.study.front.controller.dto.PsychologyCommentResponse">
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="avatar_url" property="avatarUrl" jdbcType="VARCHAR"/>
+        <result column="content" property="content" jdbcType="VARCHAR"/>
+    </resultMap>
+    <resultMap id="MoodResultMap" type="com.study.front.entities.Mood">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <id column="user_id" property="userId" jdbcType="BIGINT"/>
+        <result column="mood" property="mood" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <insert id="addMood">
+        insert into tb_mood (user_id,mood,create_time) values (#{userId},#{radio},#{today})
+    </insert>
+    <select id="getMyMood" resultMap="MoodResultMap">
+        select * from tb_mood where user_id = #{userId}
+    </select>
+    <select id="getCheckedList" resultMap="psychologyListResultMap">
+        select b.id,a.check_result,b.title,b.a_result,b.ab_result,b.bc_result,b.cd_result,b.de_result,a.create_time
+        from tb_psychology_order_question_history a left join tb_psychology_order_question b on b.id = a.question_id
+                                                    left join tb_user c on c.id = a.user_id
+        where a.user_id = #{userId}
+    </select>
+    <select id="getComments" resultMap="psychologyCommentListResultMap">
+        SELECT c.name,c.avatar_url,b.content
+        FROM tb_psychology_order_question a left join tb_psychology_order_question_comment b on b.question_id = a.id
+                                            left join tb_user c on c.id = b.user_id
+        where a.id = #{questionId} order by b.create_time desc
+    </select>
+    <insert id="insertComment">
+        insert into tb_psychology_order_question_comment(question_id,user_id,content) values (#{questionId},#{userId},#{content})
+    </insert>
+    <insert id="addHistory">
+        insert into tb_psychology_order_question_history(question_id,user_id,check_result) values (#{questionId},#{userId},#{checkResult})
+    </insert>
+    <select id="findById" resultType="com.study.front.entities.PsychologyOrderQuestion">
+        select * from tb_psychology_order_question_son where id = #{id}
+    </select>
+    <delete id="delQuestionSon">
+        delete from tb_psychology_order_question_son where parent_id = #{parentId}
+    </delete>
+    <delete id="delQuestion">
+        delete from tb_psychology_order_question where id = #{id}
+    </delete>
+    <update id="updateOrderQuestionSon" parameterType="list"  useGeneratedKeys="true" keyProperty="id">
+        <foreach collection="psychologyOrderQuestionSon" index="index" item="item" open="" close="" separator=";">
+            update tb_psychology_order_question_son
+                <set>
+            son_title=#{item.sonTitle},
+                a_option=#{item.AOption},
+                b_option=#{item.BOption},
+                c_option=#{item.COption},
+                d_option=#{item.EOption},
+                e_option=#{item.DOption},
+                a_score=#{item.AScore},
+                b_score=#{item.BScore},
+                c_score=#{item.CScore},
+                d_score=#{item.DScore},
+                e_score=#{item.EScore}
+                </set>
+            where id = #{item.id}
+        </foreach>
+
+    </update>
+    <update id="updateOrderQuestion" >
+        update tb_psychology_order_question
+        set class_id = #{classId},staff_id=#{staffId},title=#{title},is_sale=#{isSale},is_free=#{isFree},price=#{price},description=#{description},a_score_total=#{AScoreTotal},
+            b_score_total=#{BScoreTotal},c_score_total=#{CScoreTotal},d_score_total=#{DScoreTotal},e_score_total=#{EScoreTotal},a_result=#{AResult},ab_result=#{ABResult},bc_result=#{BCResult},cd_result=#{CDResult},de_result=#{DEResult},
+            file_id=#{fileId}
+        where id = #{id};
+    </update>
+    <select id="getPsychologyTotalNum" resultType="integer">
+        select count(*)
+        from tb_psychology_order_question a left join tb_staff b on b.id = a.staff_id
+        where a.title like concat('%',#{title},'%')
+    </select>
+    <select id="getPsychologySonList" resultMap="psychologySonListResultMap">
+        select * from tb_psychology_order_question_son
+    </select>
+    <select id="getPsychologyList" resultMap="psychologyListResultMap">
+        select
+            a.id,a.title,a.is_sale,a.is_free,a.price,a.description,b.staff_name,a.staff_id,c.class_name,a.class_id,a.file_id,d.url,a.create_time,
+            a.a_score_total,a.b_score_total,a.c_score_total,a.d_score_total,a.e_score_total,
+            a.a_result,a.ab_result,a.bc_result,a.cd_result,a.de_result,
+            (select count(*) from tb_psychology_order_question_history where question_id = a.id) as already_check,
+            (select count(*) from tb_psychology_order_question_comment where question_id = a.id) as already_comment
+        from tb_psychology_order_question a left join tb_staff b on b.id = a.staff_id
+                                            left join tb_psychology_class c on c.id = a.class_id
+                                            left join tb_file d on d.id = a.file_id
+        where a.class_id=#{classId} and a.is_sale=1 and  a.title like concat('%',#{title},'%')
+    </select>
+    <insert id="addOrderQuestionSon" parameterType="list">
+        insert into tb_psychology_order_question_son (parent_id,son_title,a_option,b_option,c_option,d_option,e_option,a_score,b_score,c_score,d_score,e_score) values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.parentId},#{item.sonTitle},#{item.AOption},#{item.BOption},#{item.COption},#{item.DOption},#{item.EOption},#{item.AScore},#{item.BScore},#{item.CScore},#{item.DScore},#{item.EScore})
+        </foreach>
+    </insert>
+    <insert id="addOrderQuestion" parameterType="com.study.front.entities.PsychologyOrderQuestion" useGeneratedKeys="true" keyProperty="id">
+        insert into tb_psychology_order_question(class_id,staff_id,title,is_sale,is_free,price,description,a_score_total,b_score_total,c_score_total,d_score_total,e_score_total,a_result,ab_result,bc_result,cd_result,de_result,file_id)
+        values(#{classId},#{staffId},#{title},#{isSale},#{isFree},#{price},#{description},#{AScoreTotal},#{BScoreTotal},#{CScoreTotal},#{DScoreTotal},#{EScoreTotal},#{AResult},#{ABResult},#{BCResult},#{CDResult},#{DEResult},#{fileId})
+    </insert>
+
+
+</mapper>
+
+
+
+
+

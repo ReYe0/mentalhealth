@@ -3,6 +3,9 @@ package com.study.admin.dao;
 import com.study.admin.entities.User;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
 
 /**
  * @Description: mentalhealth
@@ -12,6 +15,10 @@ import org.apache.ibatis.annotations.Param;
  */
 @Mapper
 public interface UserDao {
+    //分页总数
+    public Integer selectTotal(@Param("name") String name);
+    //用户分页
+    public List<User> selectPage(@Param("pageNum") Integer pageNum, @Param("pageSize") Integer pageSize, @Param("name") String name);
     // 管理员登陆
     public User login(User user);
 

@@ -5,6 +5,7 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import com.study.admin.common.CommonResult;
+import com.study.admin.dao.FilesDao;
 import com.study.admin.entities.Files;
 import com.study.admin.entities.Staff;
 import com.study.admin.service.FilesService;
@@ -37,9 +38,20 @@ public class FilesController {
     private String fileUploadPath;
 
     @Resource
+    private FilesDao filesDao;
+    @Resource
     private FilesService filesService;
 
-
+    //    删除文件
+    @DeleteMapping(value = "/deepDel/{id}")
+    public CommonResult deleteFile(@PathVariable Integer id){
+        Files files = filesService.findById(id);
+        if(files != null){
+            return CommonResult.success(filesDao.deleteById(id));
+        }else{
+            return CommonResult.error();
+        }
+    }
 
     /**
      * 文件上传接口

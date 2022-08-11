@@ -17,13 +17,17 @@
     </resultMap>
     <resultMap id="ArticleResultMap" type="com.study.front.controller.dto.ArticleResponse">
         <id column="id" property="id" jdbcType="BIGINT"/>
-        <result column="user_id" property="userId" jdbcType="BIGINT"/>
+        <result column="staff_id" property="staffId" jdbcType="BIGINT"/>
         <result column="title" property="title" jdbcType="BIGINT"/>
         <result column="class_id" property="classId" jdbcType="BIGINT"/>
         <result column="content" property="content" jdbcType="LONGVARCHAR"/>
         <result column="url" property="url" jdbcType="BIGINT"/>
         <result column="is_look" property="isLook" jdbcType="VARCHAR"/>
+        <result column="is_share" property="isShare" jdbcType="VARCHAR"/>
         <result column="create_time" property="createTime" jdbcType="VARCHAR"/>
+        <result column="staff_name" property="staffName" jdbcType="VARCHAR"/>
+        <result column="class_name" property="className" jdbcType="VARCHAR"/>
+<!--        <result column="create_time" property="isLook" jdbcType="VARCHAR"/>-->
 
     </resultMap>
     <!--    useGeneratedKeys这个只在insert语句中有效，正常情况下useGeneratedKeys默认为false
@@ -32,8 +36,21 @@
     keyProperty 一般都是结合数据库自动生成主键来使用，由于是数据库生成的主键，
     所以在这个对象持久化到数据库之前是对象中的这个属性是没有属性值的，但是在持久化之后又想使用这个主键， 出现这样的情况时可以keyProperty="id"
     -->
+    <delete id="quitConcern">
+        delete from tb_concern where user_id = #{userId} and staff_id = #{staffId};
+    </delete>
+    <select id="isConcern" resultType="integer">
+        select count(*) from tb_concern where user_id = #{userId} and staff_id = #{staffId};
+    </select>
+    <insert id="concernChange">
+        INSERT INTO tb_concern(staff_id,user_id) VALUES(#{staffId},#{userId});
+    </insert>
+    <select id="findByUserId" resultMap="ArticleResultMap">
+        SELECT a.id,a.staff_id,a.title,a.content,a.create_time,a.class_id,a.is_look,b.url,a.is_share
+        FROM tb_article a inner join tb_file b on b.id = a.file_id inner join tb_article_class c on c.id = a.class_id where a.staff_id = #{userId} and a.is_share = 2
+    </select>
     <select id="articleNum" resultType="integer">
-        select count(*) from tb_article where user_id = #{userId};
+        select count(*) from tb_article where staff_id = #{userId};
     </select>
     <select id="findArticleByClass" resultMap="BaseResultMap">
         select * from tb_article where class_id = #{classId} and id != #{articleId}
@@ -42,13 +59,19 @@
         update tb_article set is_look = #{lookNum} where id = #{id};
     </update>
     <select id="findById" resultMap="ArticleResultMap">
-        SELECT a.id,a.user_id,a.title,a.content,a.create_time,a.class_id,a.is_look,b.url
+        SELECT a.id,a.staff_id,a.title,a.content,a.create_time,a.class_id,a.is_look,b.url
         FROM tb_article a inner join tb_file b on b.id = a.file_id inner join tb_article_class c on c.id = a.class_id where a.id = #{id}  and is_share = 2
     </select>
 
+    <select id="findAllArticle" resultMap="ArticleResultMap">
+        SELECT a.id,a.staff_id,a.title,a.content,a.create_time,b.url,d.staff_name,c.class_name,a.is_look
+        FROM tb_article a inner join tb_file b on b.id = a.file_id inner join tb_article_class c on c.id = a.class_id
+                          inner join tb_staff d on d.id = a.staff_id
+        where is_share = 2
+       </select>
     <select id="findAllByClassId" resultMap="ArticleResultMap">
-        SELECT a.id,a.user_id,a.title,a.content,a.create_time,b.url
-        FROM tb_article a inner join tb_file b on b.id = a.file_id inner join tb_article_class c on c.id = a.class_id where class_id = #{classId}  and is_share = 2
+        SELECT a.id,a.staff_id,a.title,a.content,a.create_time,b.url,d.staff_name,c.class_name,a.is_look
+        FROM tb_article a left join tb_file b on b.id = a.file_id inner join tb_article_class c on c.id = a.class_id inner join tb_staff d on d.id = a.staff_id where class_id = #{classId}  and is_share = 2
     </select>
 
     <insert id="insertArticle" parameterType="com.study.front.entities.Article" useGeneratedKeys="true" keyProperty="id">

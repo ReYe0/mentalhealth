@@ -11,6 +11,9 @@
 <!--        <result column="avatar_url" property="avatarUrl" jdbcType="VARCHAR"/>-->
 
     </resultMap>
+    <delete id="deleteById">
+        delete from tb_file where id = #{id};
+    </delete>
     <insert id="insert" parameterType="com.study.admin.entities.Files" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO tb_file(name ,type ,size,url,md5) VALUES(#{name},#{type},#{size},#{url},#{md5});
     </insert>

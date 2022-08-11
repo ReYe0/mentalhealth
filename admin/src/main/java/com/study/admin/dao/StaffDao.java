@@ -1,5 +1,7 @@
 package com.study.admin.dao;
 
+import com.study.admin.entities.ArticleClass;
+import com.study.admin.entities.ConsultCity;
 import com.study.admin.entities.Staff;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -14,6 +16,18 @@ import java.util.List;
  */
 @Mapper
 public interface StaffDao {
+    //获取心理咨询师所在城市
+    public List<ConsultCity> getConsultCityALl();
+    //获取心理咨询师类别
+    public List<ArticleClass> getConsultClassAll();
+    //获取员工总数
+    public Integer getStaffNum();
+    //获取测试总数
+    public Integer getPsychologyNum();
+    //获取咨询总数
+    public Integer getConsultNum();
+    //获取用户数量
+    public Integer getUserNum();
     //登陆
     public Staff login(Staff staff);
     //通过id获取信息

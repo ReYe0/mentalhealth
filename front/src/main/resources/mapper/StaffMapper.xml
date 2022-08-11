@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.study.front.dao.StaffDao">
+
+    <resultMap id="BaseResultMap" type="com.study.front.entities.User">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="account" property="account" jdbcType="VARCHAR"/>
+        <result column="password" property="password" jdbcType="VARCHAR"/>
+        <result column="avatar_url" property="avatarUrl" jdbcType="VARCHAR"/>
+        <result column="info" property="info" jdbcType="VARCHAR"/>
+
+    </resultMap>
+    <resultMap id="StaffResultMap" type="com.study.front.entities.Staff">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="staff_name" property="staffName" jdbcType="VARCHAR"/>
+        <result column="account" property="account" jdbcType="VARCHAR"/>
+        <result column="password" property="password" jdbcType="VARCHAR"/>
+        <result column="avatar_url" property="avatarUrl" jdbcType="VARCHAR"/>
+        <result column="description" property="description" jdbcType="VARCHAR"/>
+        <result column="consult_price" property="consultPrice" jdbcType="VARCHAR"/>
+        <result column="class_name" property="className" jdbcType="VARCHAR"/>
+        <result column="city" property="city" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="VARCHAR"/>
+        <result column="good_at_direction" property="goodAtDirection" jdbcType="VARCHAR"/>
+        <result column="consult_object" property="consultObject" jdbcType="VARCHAR"/>
+    </resultMap>
+    <resultMap id="ConsultClassMap" type="com.study.front.entities.ArticleClass">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="class_name" property="className" jdbcType="VARCHAR"/>
+    </resultMap>
+    <resultMap id="ConsultCityMap" type="com.study.front.entities.ConsultCity">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="city" property="city" jdbcType="VARCHAR"/>
+    </resultMap>
+    <!--    useGeneratedKeys这个只在insert语句中有效，正常情况下useGeneratedKeys默认为false
+    当useGeneratedKeys为true时，如果插入的表id以自增列为主键时，将会把该自增id返回。
+
+    keyProperty 一般都是结合数据库自动生成主键来使用，由于是数据库生成的主键，
+    所以在这个对象持久化到数据库之前是对象中的这个属性是没有属性值的，但是在持久化之后又想使用这个主键， 出现这样的情况时可以keyProperty="id"
+    -->
+    <select id="getConsultUserHome" resultMap="StaffResultMap">
+        select * from tb_staff
+    </select>
+    <select id="getStaffById" resultMap="StaffResultMap">
+        select * from tb_staff where id = #{staffId}
+    </select>
+    <update id="updateTrafficByStaffId">
+        update tb_staff set traffic = #{traffic} where id = #{staffId}
+    </update>
+    <insert id="addEmailNum">
+        insert into tb_consult_email(user_id,staff_id,content) values(#{userId},#{staffId},#{content})
+    </insert>
+    <select id="getEmailNum" resultType="integer">
+        select count(*) from tb_staff a right join tb_consult_email b on b.staff_id = a.id where a.id = #{staffId}
+    </select>
+    <select id="getConsultInfo" resultMap="StaffResultMap">
+        SELECT a.id,a.staff_name,a.avatar_url,a.certificate,a.description,a.consult_price,a.traffic,a.create_time,b.class_name,c.city,
+               a.good_at_direction,a.consult_object
+        FROM tb_staff a left join tb_consult_class b on b.id = a.consult_class_id
+                        left join tb_consult_city c on c.id = a.consult_city_id
+        where a.id = #{userId}
+    </select>
+    <select id="getConsultCity" resultMap="ConsultCityMap">
+        select * from tb_consult_city
+    </select>
+    <select id="getConsultClass" resultMap="ConsultClassMap">
+        select * from tb_consult_class
+    </select>
+    <select id="getConsultUser" resultMap="StaffResultMap">
+        SELECT a.id,a.staff_name,a.avatar_url,a.certificate,a.description,a.consult_price,a.traffic,a.create_time,b.class_name,c.city
+        FROM tb_staff a left join tb_consult_class b on b.id = a.consult_class_id
+                        left join tb_consult_city c on c.id = a.consult_city_id
+        where b.class_name like concat('%',#{className},'%') and c.city like concat('%',#{city},'%') and a.staff_name like concat('%',#{consultUserName},'%') and a.consult_price between #{minPrice} and #{maxPrice}
+    </select>
+
+
+</mapper>
+
+
+
+
+

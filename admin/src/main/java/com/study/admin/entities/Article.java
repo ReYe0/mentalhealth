@@ -17,13 +17,12 @@ import java.util.Date;
 @AllArgsConstructor
 public class Article {
     private Integer id;
-    private Integer userId;
+    private Integer staffId;
     private Integer classId;
     private String title;
     private String content;
     private Integer fileId;
     private String isShare;
-//    private String articleLike;
     private String isLook;
     private Date createTime;
 }

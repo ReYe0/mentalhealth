@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.study.front.dao.BookDao">
+
+    <resultMap id="BaseResultMap" type="com.study.front.entities.Book">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="book_name" property="bookName" jdbcType="VARCHAR"/>
+        <result column="price" property="price" jdbcType="VARCHAR"/>
+        <result column="description" property="description" jdbcType="BIGINT"/>
+        <result column="discount_price" property="discountPrice" jdbcType="VARCHAR"/>
+        <result column="book_num" property="bookNum" jdbcType="VARCHAR"/>
+        <result column="is_sale" property="isSale" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="VARCHAR"/>
+        <result column="url" property="url" jdbcType="VARCHAR"/>
+        <result column="class_name" property="className" jdbcType="VARCHAR"/>
+
+    </resultMap>
+    <resultMap id="bookImgResultMap" type="com.study.front.entities.BookImg">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <id column="book_id" property="bookId" jdbcType="BIGINT"/>
+        <id column="file_id" property="fileId" jdbcType="BIGINT"/>
+        <result column="url" property="url" jdbcType="VARCHAR"/>
+    </resultMap>
+    <resultMap id="bookClassResultMap" type="com.study.front.entities.ArticleClass">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="class_name" property="className" jdbcType="VARCHAR"/>
+    </resultMap>
+    <resultMap id="bookCartResultMap" type="com.study.front.entities.BookCart">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <id column="book_id" property="bookId" jdbcType="BIGINT"/>
+        <result column="book_num" property="bookNum" jdbcType="VARCHAR"/>
+        <result column="book_name" property="bookName" jdbcType="VARCHAR"/>
+        <result column="discount_price" property="discountPrice" jdbcType="VARCHAR"/>
+        <result column="price" property="price" jdbcType="VARCHAR"/>
+    </resultMap>
+    <resultMap id="userCityResultMap" type="com.study.front.entities.UserCity">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <id column="user_id" property="userId" jdbcType="BIGINT"/>
+        <result column="receiver" property="receiver" jdbcType="VARCHAR"/>
+        <result column="receiver_phone" property="receiverPhone" jdbcType="VARCHAR"/>
+        <result column="city_detail" property="cityDetail" jdbcType="VARCHAR"/>
+        <result column="remark" property="remark" jdbcType="VARCHAR"/>
+    </resultMap>
+    <resultMap id="BookOrderResultMap" type="com.study.front.entities.BookOrder">
+        <id column="id" property="id" jdbcType="VARCHAR"/>
+        <id column="user_id" property="userId" jdbcType="BIGINT"/>
+        <result column="book_num" property="bookNum" jdbcType="VARCHAR"/>
+        <result column="total_price" property="totalPrice" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="VARCHAR"/>
+        <result column="receiver" property="receiver" jdbcType="VARCHAR"/>
+        <result column="receiver_phone" property="receiverPhone" jdbcType="VARCHAR"/>
+        <result column="city_detail" property="cityDetail" jdbcType="VARCHAR"/>
+        <result column="remark" property="remark" jdbcType="VARCHAR"/>
+    </resultMap>
+    <resultMap id="BookOrderSonResultMap" type="com.study.front.entities.BookOrderSon">
+        <result column="book_num" property="bookNum" jdbcType="VARCHAR"/>
+        <result column="order_id" property="orderId" jdbcType="VARCHAR"/>
+        <result column="book_id" property="bookId" jdbcType="VARCHAR"/>
+        <result column="book_name" property="bookName" jdbcType="VARCHAR"/>
+        <result column="discount_price" property="discountPrice" jdbcType="VARCHAR"/>
+    </resultMap>
+    <select id="getHomeBook" resultMap="BaseResultMap">
+        select id,book_name,description,discount_price from tb_book
+    </select>
+    <insert id="addUserCity">
+        insert into tb_user_city (user_id,receiver,receiver_phone,city_detail,remark) values (#{userId},#{receiver},#{receiverPhone},#{cityDetail},#{remark})
+    </insert>
+    <select id="getBookOrderSonAll" resultMap="BookOrderSonResultMap">
+        select a.order_id,a.book_num,a.book_id,b.book_name,b.discount_price
+        from tb_book_order_son a left join tb_book b on b.id = a.book_id
+    </select>
+    <select id="getBookOrderByUserId" resultMap="BookOrderResultMap">
+        select * from tb_book_order where user_id = #{userId} order by create_time desc
+    </select>
+    <update id="updateUserCity" useGeneratedKeys="true" keyProperty="id">
+        update tb_user_city set receiver = #{receiver},receiver_phone = #{receiverPhone},city_detail = #{cityDetail},remark = #{remark}
+        where user_id = #{userId}
+    </update>
+    <delete id="delBookBeId">
+        delete from tb_book where id =#{id};
+    </delete>
+    <select id="getUserCity" resultMap="userCityResultMap">
+        select * from tb_user_city where user_id = #{userId}
+    </select>
+    <insert id="addOrderSon">
+        insert into tb_book_order_son (order_id,book_id,book_num) values (#{orderId},#{bookId},#{bookNumSon})
+    </insert>
+    <insert id="addOrder" useGeneratedKeys="true" keyProperty="id">
+        insert  into tb_book_order(id,book_num,total_price,user_id,receiver,receiver_phone,city_detail,remark) values (#{id},#{bookNum},#{totalPrice},#{userId},#{receiver},#{receiverPhone},#{cityDetail},#{remark})
+    </insert>
+    <delete id="delCartById">
+        delete from tb_book_cart where id = #{id}
+    </delete>
+    <select id="getCartList" resultMap="bookCartResultMap">
+        select a.id,a.book_id,a.book_num,b.book_name,b.discount_price,b.price
+        from tb_book_cart a left join tb_book b on b.id = a.book_id
+        where a.user_id = #{userId}
+    </select>
+    <update id="updateCartBookNum">
+        update  tb_book_cart set book_num = #{bookNum} where book_id=#{bookId} and user_id = #{userId}
+    </update>
+    <select id="getCartBookNum" resultType="integer">
+        select book_num from tb_book_cart where book_id = #{bookId} and user_id=#{userId}
+    </select>
+    <select id="judgeCart" resultType="integer">
+        select count(*) from tb_book_cart where book_id = #{bookId} and user_id=#{userId}
+    </select>
+    <insert id="addCart">
+        insert into tb_book_cart(user_id,book_id,book_num) values (#{userId},#{bookId},#{bookNum})
+    </insert>
+    <select id="getDetailsById" resultMap="BaseResultMap">
+        select * from tb_book where id = #{productID}
+    </select>
+    <select id="findBookClass" resultMap="bookClassResultMap">
+        select * from tb_book_class
+    </select>
+    <select id="pageTotal" resultType="integer">
+        select count(distinct a.id)
+        from tb_book a left join tb_book_img b on b.book_id = a.id
+--                        left join tb_file c on c.id = b.file_id
+                       left join tb_book_class d on d.id = a.book_class_id
+        where a.is_sale = 1 and  d.class_name like concat('%',#{className},'%')
+    </select>
+    <select id="findBookImgs" resultMap="bookImgResultMap">
+        select a.id,a.book_id,a.file_id,b.url
+        from tb_book_img a left join tb_file b on b.id = a.file_id
+    </select>
+    <select id="findBookAll" resultMap="BaseResultMap">
+        select distinct a.id,a.book_name,a.price,a.description,a.discount_price,a.book_class_id,d.class_name
+        from tb_book a left join tb_book_class d on d.id = a.book_class_id
+        where a.is_sale = 1 and  d.class_name like concat('%',#{className},'%') limit #{pageNum},#{pageSize}
+    </select>
+    <insert id="addBookImg">
+        insert into tb_book_img(file_id,book_id) values (#{fileId},#{bookId});
+    </insert>
+   <insert id="addBook" useGeneratedKeys="true" keyProperty="id">
+       insert into tb_book(book_name,price,description,discount_price,book_num,is_sale) values (#{bookName},#{price},#{description},#{discountPrice},#{bookNum},#{isSale})
+   </insert>
+</mapper>
+
+
+
+
+

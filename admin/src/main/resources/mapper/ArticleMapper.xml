@@ -5,7 +5,7 @@
 
     <resultMap id="BaseResultMap" type="com.study.admin.entities.Article">
         <id column="id" property="id" jdbcType="BIGINT"/>
-        <result column="user_id" property="userId" jdbcType="BIGINT"/>
+        <result column="staff_id" property="staffId" jdbcType="BIGINT"/>
         <result column="class_id" property="classId" jdbcType="BIGINT"/>
         <result column="title" property="title" jdbcType="VARCHAR"/>
         <result column="content" property="content" jdbcType="VARCHAR"/>
@@ -17,35 +17,101 @@
     </resultMap>
     <resultMap id="ArticleResultMap" type="com.study.admin.controller.dto.admin.ArticleResponse">
         <id column="id" property="id" jdbcType="BIGINT"/>
-        <result column="user_id" property="userId" jdbcType="BIGINT"/>
+        <result column="staff_id" property="staffId" jdbcType="BIGINT"/>
         <result column="title" property="title" jdbcType="BIGINT"/>
         <result column="class_id" property="classId" jdbcType="BIGINT"/>
+        <result column="file_id" property="fileId" jdbcType="BIGINT"/>
         <result column="content" property="content" jdbcType="LONGVARCHAR"/>
         <result column="url" property="url" jdbcType="BIGINT"/>
+        <result column="is_look" property="isLook" jdbcType="BIGINT"/>
+        <result column="praiseNum" property="praiseNum" jdbcType="BIGINT"/>
+        <result column="commentNum" property="commentNum" jdbcType="INTEGER"/>
         <result column="is_share" property="isShare" jdbcType="VARCHAR"/>
+        <result column="staff_name" property="staffName" jdbcType="VARCHAR"/>
+        <result column="class_name" property="className" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="VARCHAR"/>
+        <result column="role" property="role" jdbcType="VARCHAR"/>
+
+    </resultMap>
+    <resultMap id="ArticleCommentResultMap" type="com.study.admin.controller.dto.admin.ArticleComment">
+        <id column="comment_id" property="commentId" jdbcType="BIGINT"/>
+        <result column="article_id" property="articleId" jdbcType="BIGINT"/>
+        <result column="title" property="title" jdbcType="BIGINT"/>
+        <result column="comment_content" property="commentContent" jdbcType="VARCHAR"/>
+        <result column="user_id" property="userId" jdbcType="BIGINT"/>
+        <result column="parent_id" property="parentId" jdbcType="BIGINT"/>
+        <result column="comment_like" property="commentLike" jdbcType="BIGINT"/>
+        <result column="avatar_url" property="avatarUrl" jdbcType="VARCHAR"/>
+        <result column="name" property="name" jdbcType="BIGINT"/>
         <result column="create_time" property="createTime" jdbcType="VARCHAR"/>
 
     </resultMap>
+
     <!--    useGeneratedKeys这个只在insert语句中有效，正常情况下useGeneratedKeys默认为false
     当useGeneratedKeys为true时，如果插入的表id以自增列为主键时，将会把该自增id返回。
 
     keyProperty 一般都是结合数据库自动生成主键来使用，由于是数据库生成的主键，
     所以在这个对象持久化到数据库之前是对象中的这个属性是没有属性值的，但是在持久化之后又想使用这个主键， 出现这样的情况时可以keyProperty="id"
     -->
+    <select id="findMyArticle" resultType="com.study.admin.controller.dto.admin.MyArticleResponse">
+        select a.id,a.title,a.content,c.url
+        from tb_article a left join tb_staff b on b.id = a.staff_id
+                          left join tb_file c on c.id = a.file_id
+        where a.staff_id = #{staffId}
+    </select>
+    <delete id="delFirstComments">
+        delete from tb_article_comment where parent_id = #{commentId}
+    </delete>
+    <delete id="delSecondComments">
+        delete from tb_article_comment where comment_id = #{commentId}
+    </delete>
+    <select id="getComments" resultMap="ArticleCommentResultMap">
+        select c.name,b.comment_content,b.comment_id from tb_article a inner join tb_article_comment b on b.article_id = a.id
+                                                                       inner join tb_user c on c.id = b.user_id
+        where parent_id = #{commentId}
+    </select>
+    <select id="getAllArticle" resultMap="ArticleCommentResultMap">
+        select distinct b.article_id,a.title from tb_article a inner join tb_article_comment b on b.article_id = a.id inner join tb_user c on c.id = b.user_id
+    </select>
+    <select id="getFirstComments" resultMap="ArticleCommentResultMap">
+        select b.comment_id,b.article_id,a.title,b.comment_content,b.user_id,b.parent_id,b.comment_like,c.avatar_url,c.name,b.create_time from tb_article a inner join tb_article_comment b on b.article_id = a.id inner join tb_user c on c.id = b.user_id
+        where a.id = #{articleId} and b.parent_id is null  order by b.create_time asc
+    </select>
+    <update id="updateArticle">
+        update tb_article set staff_id = #{staffId},class_id=#{classId},title=#{title},content=#{content},file_id=#{fileId},is_share=#{isShare} where id = #{id};
+    </update>
+    <insert id="insertArticle" parameterType="com.study.admin.entities.Article" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO tb_article(staff_id,class_id,title,content,file_id,is_share) VALUES(#{staffId},#{classId},#{title},#{content},#{fileId},#{isShare});
+    </insert>
     <delete id="delArticleById">
         delete from tb_article where id = #{id}
     </delete>
     <select id="updateShare" resultType="integer">
         update tb_article set is_share = #{share} where id = #{id};
     </select>
+    <select id="findArticleListByRole" resultMap="ArticleResultMap">
+        SELECT DISTINCT a.id,d.staff_name,a.staff_id,a.is_share,a.class_id,a.title,a.content,a.create_time,a.is_look,b.url,c.class_name,d.role,IFNULL((select DISTINCT count(*)  from tb_praise where article_id = a.id  GROUP BY article_id),0) as praiseNum ,
+                        IFNULL((select DISTINCT count(*) from tb_article_comment where article_id = a.id  GROUP BY article_id),0) as commentNum
+        FROM tb_article a left join tb_file b on b.id = a.file_id left join tb_article_class c on c.id = a.class_id
+                          left join tb_staff d on d.id = a.staff_id
+                          left join tb_praise e on e.article_id = a.id
+                          left join tb_article_comment f on f.article_id = a.id
+        where d.role=#{role} and a.title like concat('%',#{title},'%') order by create_time desc limit #{pageNum},#{pageSize} ;
+    </select>
     <select id="findArticleList" resultMap="ArticleResultMap">
-        SELECT a.id,d.name,a.user_id,a.is_share,a.class_id,a.title,a.content,a.create_time,b.url
-        FROM tb_article a inner join tb_file b on b.id = a.file_id inner join tb_article_class c on c.id = a.class_id
-                          inner join tb_user d on d.id = a.user_id
-        where a.is_share != 0 and a.title like concat('%',#{title},'%') order by create_time desc limit #{pageNum},#{pageSize} ;
+        SELECT DISTINCT a.id,d.staff_name,a.staff_id,a.is_share,a.class_id,a.title,a.content,a.create_time,a.is_look,b.url,c.class_name,d.role,IFNULL((select DISTINCT count(*)  from tb_praise where article_id = a.id  GROUP BY article_id),0) as praiseNum ,
+                        IFNULL((select DISTINCT count(*) from tb_article_comment where article_id = a.id  GROUP BY article_id),0) as commentNum
+        FROM tb_article a left join tb_file b on b.id = a.file_id left join tb_article_class c on c.id = a.class_id
+                          left join tb_staff d on d.id = a.staff_id
+                          left join tb_praise e on e.article_id = a.id
+                          left join tb_article_comment f on f.article_id = a.id
+        where is_share != 0 and a.title like concat('%',#{title},'%') order by create_time desc limit #{pageNum},#{pageSize} ;
+    </select>
+    <select id="selectTotalByRole" resultType="integer">
+        select count(*) from  tb_staff a inner join tb_article b on a.id = b.staff_id where  a.role=#{role} and b.title like concat('%',#{title},'%');
     </select>
     <select id="selectTotal" resultType="integer">
-        select count(*) from tb_article where title like concat('%',#{title},'%');
+        select count(*) from tb_article where is_share != 0 and title like concat('%',#{title},'%');
     </select>
     <select id="findArticleByClass" resultMap="BaseResultMap">
         select * from tb_article where class_id = #{classId} and id != #{articleId}

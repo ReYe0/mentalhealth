@@ -25,6 +25,7 @@ public class UserController {
 
     @Resource
     private UserService userService;
+
 //登陆
     @RequestMapping(value = "/login",method = RequestMethod.POST)
     public CommonResult Login(@RequestBody User user, UserRequest userRequest){

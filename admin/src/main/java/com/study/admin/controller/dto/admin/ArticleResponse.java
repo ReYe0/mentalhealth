@@ -14,15 +14,21 @@ import java.util.List;
 @Data
 public class ArticleResponse {
     private Integer id;//文章id
-    private String name;
-    private Integer userId;
+    private String staffName;
+    private Integer staffId;
     private Integer classId;
+    private Integer fileId;
     private String title;
     private String content;
     private String url;
 //    private String isLike;
     private String isShare;
+    private String className;
     private Date createTime;
+    private String role;
+    private Integer praiseNum;
+    private Integer isLook;
+    private Integer commentNum;
 //    private List<ArticleComment> comments;
 
 

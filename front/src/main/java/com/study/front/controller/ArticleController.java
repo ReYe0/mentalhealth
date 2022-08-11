@@ -49,6 +49,31 @@ public class ArticleController {
 //    管理员
 
     //***********************************************以下是用户端
+    @GetMapping(value = "/findMyArticle")
+    public CommonResult findMyArticle(Integer staffId){
+        return CommonResult.success(articleDao.findByUserId(staffId));
+    }
+    //是否关注
+    @GetMapping(value = "/quitConcern")
+    public CommonResult quitConcern(Integer userId,Integer staffId){
+        return CommonResult.success(articleDao.quitConcern(userId,staffId));
+    }
+    //是否关注
+    @GetMapping(value = "/isConcern")
+    public CommonResult isConcern(Integer userId,Integer staffId){
+        return CommonResult.success(articleDao.isConcern(userId,staffId));
+    }
+    //关注
+    @GetMapping(value = "/concern")
+    public CommonResult concern(Integer userId,Integer staffId){
+        return CommonResult.success(articleDao.concernChange(userId,staffId));
+    }
+    //根据用户id获取文章
+    @GetMapping(value = "/userArticle/{userId}")
+    public CommonResult getArticleByUserId(@PathVariable("userId") Integer userId){
+        List<ArticleResponse> res = articleDao.findByUserId(userId);
+        return CommonResult.success(res);
+    }
     //获取用户点赞数
     @GetMapping(value = "/praiseNumTotal/{userId}")
     public CommonResult getPraise(@PathVariable("userId") Integer userId){
@@ -151,10 +176,13 @@ public class ArticleController {
     //按类别查找文章
     @GetMapping(value = "/findAll/{classId}")
     public  CommonResult articleFindAll(@PathVariable("classId") Integer classId){
-        if(classId == null){
-            classId = 1;
+        List<ArticleResponse> article = null;
+        if(classId == 0){
+            article = articleDao.findAllArticle();
+        }else{
+            article = articleDao.findAllByClassId(classId);
         }
-        return CommonResult.success(articleDao.findAllByClassId(classId));
+        return CommonResult.success(article);
     }
 //    文章上传
     @PostMapping(value = "/up")

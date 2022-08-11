@@ -15,14 +15,16 @@ import java.util.List;
 @Data
 public class ArticleResponse {
     private Integer id;//文章id
-    private Integer userId;
+    private Integer staffId;
     private Integer classId;
     private String title;
     private String content;
     private String url;
-//    private String isLike;
+    private String isShare;
     private String isLook;
     private Date createTime;
+    private String staffName;
+    private String className;
     private List<ArticleComment> comments;
 
 

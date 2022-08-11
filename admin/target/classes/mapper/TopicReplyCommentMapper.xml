@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.study.admin.dao.TopicReplyCommentDao">
+
+    <resultMap id="BaseResultMap" type="com.study.admin.entities.TopicReplyComment">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <id column="topic_reply_id" property="topicReplyId" jdbcType="BIGINT"/>
+        <id column="user_id" property="userId" jdbcType="BIGINT"/>
+        <id column="parent_id" property="parentId" jdbcType="BIGINT"/>
+        <result column="content" property="content" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="VARCHAR"/>
+        <result column="reply_type" property="replyType" jdbcType="TINYINT"/>
+
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="avatar_url" property="avatarUrl" jdbcType="VARCHAR"/>
+        <result column="staff_name" property="staffName" jdbcType="VARCHAR"/>
+        <result column="admin_url" property="adminUrl" jdbcType="VARCHAR"/>
+        <result column="topicReplyIsWho" property="topicReplyIsWho" jdbcType="TINYINT"/>
+
+    </resultMap>
+    <resultMap id="ReplyResultMap" type="com.study.admin.controller.dto.TopicReplyResponse">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="avatar_url" property="avatarUrl" jdbcType="VARCHAR"/>
+        <result column="content" property="content" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="VARCHAR"/>
+        <result column="staff_name" property="staffName" jdbcType="VARCHAR"/>
+        <result column="admin_url" property="adminUrl" jdbcType="VARCHAR"/>
+        <result column="reply_type" property="replyType" jdbcType="TINYINT"/>
+
+    </resultMap>
+
+    <select id="findAllByTopicReplyId" resultMap="BaseResultMap">
+        select a.id,a.topic_reply_id,a.content,a.parent_id,a.user_id,a.reply_type,d.reply_type as topicReplyIsWho,b.name,b.avatar_url,c.staff_name,c.avatar_url as admin_url
+        from tb_topic_reply_comment a inner join tb_user b on b.id = a.user_id
+                                      left join tb_staff c on c.id = a.user_id
+                                      left join tb_topic_reply d on d.id = a.topic_reply_id
+    where a.topic_reply_id = #{topicReplyId}
+    </select>
+    <insert id="insertReplyComment" parameterType="com.study.admin.entities.TopicReplyComment" useGeneratedKeys="true" keyProperty="id">
+        insert into tb_topic_reply_comment(topic_reply_id,user_id,parent_id,content,reply_type) values (#{topicReplyId},#{userId},#{parentId},#{content},#{replyType})
+    </insert>
+
+
+</mapper>
+
+
+
+
+

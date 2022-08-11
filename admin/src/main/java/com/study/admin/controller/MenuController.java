@@ -58,7 +58,7 @@ public class MenuController {
     }
 
     //保存和更新
-    @PostMapping(value = "/save")
+    @PostMapping(value = "/save",produces = "application/json")
     public CommonResult save(@RequestBody Menu menu){
         Integer status = 0;
         System.out.println("111111111111111");

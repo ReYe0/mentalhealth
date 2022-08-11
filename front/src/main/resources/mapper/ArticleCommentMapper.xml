@@ -21,8 +21,7 @@
         select count(*) from tb_article_comment where article_id = #{articleId};
     </select>
     <select id="getComments" resultMap="BaseResultMap">
-        select * from tb_article a inner join tb_article_comment b on b.article_id = a.id inner join tb_user c on c.id = b.user_id
-
+        select b.comment_id,b.article_id,b.comment_content,b.user_id,b.parent_id,b.comment_like,c.avatar_url,c.name,b.create_time from tb_article a inner join tb_article_comment b on b.article_id = a.id inner join tb_user c on c.id = b.user_id
         where a.id = #{articleId} order by b.create_time asc
     </select>
 

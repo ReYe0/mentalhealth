@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.study.admin.dao.BookDao">
+
+    <resultMap id="BaseResultMap" type="com.study.admin.entities.Book">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="book_name" property="bookName" jdbcType="VARCHAR"/>
+        <result column="price" property="price" jdbcType="VARCHAR"/>
+        <result column="description" property="description" jdbcType="BIGINT"/>
+        <result column="discount_price" property="discountPrice" jdbcType="VARCHAR"/>
+        <result column="book_num" property="bookNum" jdbcType="VARCHAR"/>
+        <result column="is_sale" property="isSale" jdbcType="VARCHAR"/>
+        <result column="book_class_id" property="bookClassId" jdbcType="BIGINT"/>
+        <result column="create_time" property="createTime" jdbcType="VARCHAR"/>
+    </resultMap>
+    <resultMap id="bookImgResultMap" type="com.study.admin.entities.BookImg">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <id column="book_id" property="bookId" jdbcType="BIGINT"/>
+        <id column="file_id" property="fileId" jdbcType="BIGINT"/>
+        <result column="url" property="url" jdbcType="VARCHAR"/>
+    </resultMap>
+    <resultMap id="bookClassResultMap" type="com.study.admin.entities.ArticleClass">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="class_name" property="className" jdbcType="VARCHAR"/>
+    </resultMap>
+    <resultMap id="BookOrderSonResultMap" type="com.study.admin.entities.BookOrderSon">
+        <result column="book_num" property="bookNum" jdbcType="VARCHAR"/>
+        <result column="order_id" property="orderId" jdbcType="VARCHAR"/>
+        <result column="book_id" property="bookId" jdbcType="VARCHAR"/>
+        <result column="book_name" property="bookName" jdbcType="VARCHAR"/>
+        <result column="discount_price" property="discountPrice" jdbcType="VARCHAR"/>
+    </resultMap>
+    <resultMap id="BookOrderResultMap" type="com.study.admin.entities.BookOrder">
+        <id column="id" property="id" jdbcType="VARCHAR"/>
+        <id column="user_id" property="userId" jdbcType="BIGINT"/>
+        <result column="book_num" property="bookNum" jdbcType="VARCHAR"/>
+        <result column="total_price" property="totalPrice" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="VARCHAR"/>
+        <result column="receiver" property="receiver" jdbcType="VARCHAR"/>
+        <result column="receiver_phone" property="receiverPhone" jdbcType="VARCHAR"/>
+        <result column="city_detail" property="cityDetail" jdbcType="VARCHAR"/>
+        <result column="remark" property="remark" jdbcType="VARCHAR"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+    </resultMap>
+    <select id="getBookOrderSonAll" resultMap="BookOrderSonResultMap">
+        select a.order_id,a.book_num,a.book_id,b.book_name,b.discount_price
+        from tb_book_order_son a left join tb_book b on b.id = a.book_id
+    </select>
+    <select id="orderPageTotal" resultType="integer">
+        select count(*)
+        from tb_book_order a left join tb_user b on b.id = a.user_id
+        where a.id like concat('%',#{id},'%')
+    </select>
+    <select id="getBookOrder" resultMap="BookOrderResultMap">
+        select a.id,a.book_num,a.total_price,a.create_time,a.receiver,a.receiver_phone,a.city_detail,a.remark,b.name
+        from tb_book_order a left join tb_user b on b.id = a.user_id
+        where a.id like concat('%',#{id},'%') order by a.create_time desc limit #{pageNum},#{pageSize}
+    </select>
+    <select id="getBookClass" resultMap="bookClassResultMap">
+        select * from tb_book_class
+    </select>
+    <update id="updateBook" useGeneratedKeys="true" keyProperty="id">
+        update tb_book set book_name = #{bookName},description = #{description},price = #{price},discount_price = #{discountPrice},
+                                book_num=#{bookNum},is_sale=#{isSale},book_class_id=#{bookClassId}
+        where id = #{id}
+    </update>
+    <delete id="delBookBeId">
+        delete from tb_book where id =#{id};
+    </delete>
+    <delete id="delBookImgById">
+        delete from tb_book_img where id = #{id}
+    </delete>
+    <select id="pageTotal" resultType="integer">
+        select count(*) from tb_book where book_name like concat('%',#{bookName},'%')
+    </select>
+    <select id="findBookImgs" resultMap="bookImgResultMap">
+        select a.id,a.book_id,a.file_id,b.url
+        from tb_book_img a left join tb_file b on b.id = a.file_id
+    </select>
+    <select id="findBookAll" resultMap="BaseResultMap">
+        select * from tb_book where book_name like concat('%',#{bookName},'%') order by create_time desc limit #{pageNum},#{pageSize}
+    </select>
+    <insert id="addBookImg">
+        insert into tb_book_img(file_id,book_id) values (#{fileId},#{bookId});
+    </insert>
+   <insert id="addBook" useGeneratedKeys="true" keyProperty="id">
+       insert into tb_book(book_name,price,description,discount_price,book_num,is_sale,book_class_id) values (#{bookName},#{price},#{description},#{discountPrice},#{bookNum},#{isSale},#{bookClassId})
+   </insert>
+</mapper>
+
+
+
+
+

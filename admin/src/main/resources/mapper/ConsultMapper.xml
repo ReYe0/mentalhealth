@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.study.admin.dao.ConsultDao">
+
+    <resultMap id="BaseResultMap" type="com.study.admin.entities.Consult">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="user_id" property="userId" jdbcType="BIGINT"/>
+        <result column="date_value" property="dateValue" jdbcType="VARCHAR"/>
+        <result column="time_value" property="timeValue" jdbcType="VARCHAR"/>
+        <result column="order_type" property="orderType" jdbcType="VARCHAR"/>
+        <result column="is_enable" property="isEnable" jdbcType="VARCHAR"/>
+        <result column="sex" property="sex" jdbcType="VARCHAR"/>
+        <result column="phone" property="phone" jdbcType="VARCHAR"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="record" property="record" jdbcType="VARCHAR"/>
+        <result column="value" property="value" jdbcType="VARCHAR"/>
+        <result column="label" property="label" jdbcType="VARCHAR"/>
+
+    </resultMap>
+    <resultMap id="ConsultMsgResultMap" type="com.study.admin.entities.ConsultMsg">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <id column="user_id" property="userId" jdbcType="BIGINT"/>
+        <id column="staff_id" property="staffId" jdbcType="BIGINT"/>
+        <result column="msg" property="msg" jdbcType="VARCHAR"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="type" property="type" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="VARCHAR"/>
+    </resultMap>
+    <delete id="delConsultOrder" >
+        delete from tb_consult_order where id = #{orderId}
+    </delete>
+    <update id="updateConsultOrderById">
+        update tb_consult_order set is_enable = #{isEnable} where id = #{orderId}
+    </update>
+    <select id="getMsgHistory" resultMap="ConsultMsgResultMap">
+        select * from tb_consult_msg where user_id = #{userId} and staff_id = #{staffId} order by create_time asc;
+    </select>
+    <select id="getConsultUser" resultMap="BaseResultMap">
+        select a.id,a.user_id as value,b.name as label,a.date_value,a.time_value,a.order_type,a.is_enable,b.sex,b.phone
+        from tb_consult_order a left join tb_user b on b.id = a.user_id
+                                left join tb_staff c on c.id = a.staff_id
+        where c.id = #{staffId} order by a.date_value asc,a.time_value asc
+    </select>
+    <update id="updateRecord">
+        update tb_consult_order set record = #{record} where id = #{id}
+    </update>
+    <select id="getConsultOrderListTotal" resultType="integer">
+        select count(*)
+        from tb_consult_order a left join tb_user b on b.id = a.user_id
+                                left join tb_staff c on c.id = a.staff_id
+        where b.name like concat('%',#{name},'%') and a.date_value like concat('%',#{date},'%');
+    </select>
+    <select id="getConsultOrderList" resultMap="BaseResultMap">
+        select a.id,a.user_id,b.name,a.date_value,a.time_value,a.order_type,a.is_enable,b.sex,b.phone,a.record
+        from tb_consult_order a left join tb_user b on b.id = a.user_id
+                                left join tb_staff c on c.id = a.staff_id
+        where c.id = #{staffId} and b.name like concat('%',#{name},'%') and a.date_value like concat('%',#{date},'%') order by a.date_value desc,a.time_value asc limit #{pageNum},#{pageSize} ;
+    </select>
+
+
+</mapper>
+
+
+
+
+

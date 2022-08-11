@@ -1,6 +1,10 @@
 package com.study.admin.controller;
 
 import com.study.admin.controller.dto.UserRequest;
+import com.study.admin.dao.UserDao;
+import com.study.admin.entities.ArticleClass;
+import com.study.admin.entities.ConsultCity;
+import com.study.admin.entities.Staff;
 import com.study.admin.entities.User;
 import com.study.admin.common.CommonResult;
 import com.study.admin.service.UserService;
@@ -8,6 +12,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @Description: mentalhealth
@@ -25,6 +32,22 @@ public class UserController {
 
     @Resource
     private UserService userService;
+    @Resource
+    private UserDao userDao;
+
+    //    分页查询
+    @GetMapping(value = "/page")
+    public CommonResult findPage(@RequestParam Integer pageNum,@RequestParam Integer pageSize,@RequestParam(defaultValue = "") String name){
+        pageNum = (pageNum - 1) * pageSize;
+        List<User> userList = userDao.selectPage(pageNum, pageSize,name);
+//        name = '%' + name + '%';
+        Integer total = userDao.selectTotal(name);
+        Map<String,Object> res = new HashMap<>();
+        res.put("userList",userList);
+        res.put("total",total);
+//        TokenUtil.getCurrentAdminUser();
+        return CommonResult.success(res);
+    }
 //登陆
     @RequestMapping(value = "/login",method = RequestMethod.POST)
     public CommonResult Login(@RequestBody User user, UserRequest userRequest){

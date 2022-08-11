@@ -12,14 +12,74 @@
         <result column="info" property="info" jdbcType="VARCHAR"/>
 
     </resultMap>
+
+    <resultMap id="StaffResultMap" type="com.study.front.entities.Staff">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="staff_name" property="staffName" jdbcType="VARCHAR"/>
+        <result column="account" property="account" jdbcType="VARCHAR"/>
+        <result column="password" property="password" jdbcType="VARCHAR"/>
+        <result column="avatar_url" property="avatarUrl" jdbcType="VARCHAR"/>
+        <result column="sex" property="sex" jdbcType="TINYINT"/>
+        <result column="phone" property="phone" jdbcType="VARCHAR"/>
+        <result column="email" property="email" jdbcType="VARCHAR"/>
+        <result column="certificate" property="certificate" jdbcType="VARCHAR"/>
+        <result column="description" property="description" jdbcType="VARCHAR"/>
+        <result column="traffic" property="traffic" jdbcType="VARCHAR"/>
+        <result column="role" property="role" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="consult_price" property="consultPrice" jdbcType="VARCHAR"/>
+        <result column="consult_class_id" property="consultClassId" jdbcType="BIGINT"/>
+        <result column="consult_city_id" property="consultCityId" jdbcType="BIGINT"/>
+        <result column="good_at_direction" property="goodAtDirection" jdbcType="VARCHAR"/>
+        <result column="consult_object" property="consultObject" jdbcType="VARCHAR"/>
+        <result column="class_name" property="className" jdbcType="VARCHAR"/>
+    </resultMap>
+    <resultMap id="ConsultOrderResultMap" type="com.study.front.entities.ConsultOrder">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="staff_name" property="staffName" jdbcType="VARCHAR"/>
+        <result column="avatar_url" property="avatarUrl" jdbcType="VARCHAR"/>
+        <result column="date_value" property="dateValue" jdbcType="VARCHAR"/>
+        <result column="time_value" property="timeValue" jdbcType="VARCHAR"/>
+        <result column="order_type" property="orderType" jdbcType="VARCHAR"/>
+        <result column="is_enable" property="isEnable" jdbcType="VARCHAR"/>
+    </resultMap>
+    <resultMap id="ConsultMsgResultMap" type="com.study.front.entities.ConsultMsg">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <id column="user_id" property="userId" jdbcType="BIGINT"/>
+        <id column="staff_id" property="staffId" jdbcType="BIGINT"/>
+        <result column="msg" property="msg" jdbcType="VARCHAR"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="type" property="type" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="VARCHAR"/>
+    </resultMap>
     <!--    useGeneratedKeys这个只在insert语句中有效，正常情况下useGeneratedKeys默认为false
     当useGeneratedKeys为true时，如果插入的表id以自增列为主键时，将会把该自增id返回。
 
     keyProperty 一般都是结合数据库自动生成主键来使用，由于是数据库生成的主键，
     所以在这个对象持久化到数据库之前是对象中的这个属性是没有属性值的，但是在持久化之后又想使用这个主键， 出现这样的情况时可以keyProperty="id"
     -->
-    <select id="findUserByArticleId" resultMap="BaseResultMap">
-        select distinct a.id,a.name,a.avatar_url,a.info from tb_user a inner join tb_article b on b.user_id = a.id where b.id = #{articleId}
+    <select id="getFocusStaff" resultMap="StaffResultMap">
+        SELECT b.id,b.staff_name,b.certificate,b.description,b.good_at_direction,b.good_at_direction
+        FROM tb_concern a left join tb_staff b on b.id = a.staff_id
+        where a.user_id = #{userId}
+    </select>
+    <select id="getMsgHistory" resultMap="ConsultMsgResultMap">
+        select * from tb_consult_msg where user_id = #{userId} and staff_id = #{staffId} order by create_time asc;
+    </select>
+    <insert id="insertMsg">
+        insert into tb_consult_msg(user_id,staff_id,msg,name,type) values (#{userId},#{staffId},#{msg},#{name},#{type})
+    </insert>
+    <select id="getMyOrderHistory" resultMap="ConsultOrderResultMap">
+        select c.id,c.staff_name,c.avatar_url,a.date_value,a.time_value,a.order_type,a.is_enable
+        from tb_consult_order a left join tb_user b on b.id = a.user_id
+                                left join tb_staff c on c.id = a.staff_id
+where b.id = #{userId}
+    </select>
+    <insert id="orderConsultUser">
+        insert into tb_consult_order(user_id,staff_id,date_value,time_value,order_type) values (#{userId},#{staffId},#{dateValue},#{timeValue},#{orderType})
+    </insert>
+    <select id="findUserByArticleId" resultMap="StaffResultMap">
+        select distinct a.id,a.staff_name,a.avatar_url,a.description from tb_staff a inner join tb_article b on b.staff_id = a.id where b.id = #{articleId}
     </select>
     <select id="login" parameterType="string" resultMap="BaseResultMap">
         select * from tb_user where account = #{account} and password = #{password};
@@ -29,6 +89,12 @@
         INSERT INTO tb_admin(admin_name,account,password) VALUES(#{adminName},#{account},#{password});
     </insert>
 
+    <select id="findByStaffId" resultMap="StaffResultMap">
+        select * from tb_staff where id = #{staffId}
+    </select>
+    <update id="updateUserById" parameterType="integer">
+        update tb_user set channel = #{value} where id = #{id}
+    </update>
     <select id="getUserById" parameterType="integer" resultMap="BaseResultMap" >
         SELECT * FROM tb_user WHERE id=#{id};
     </select>

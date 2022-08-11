@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
+
 /**
  * @Description: mentalhealth
  * @Author: 二爷
@@ -19,4 +21,6 @@ public class User {
     private String account;
     private String password;
     private String avatarUrl;
+    private String info;
+    private Date createTime;
 }

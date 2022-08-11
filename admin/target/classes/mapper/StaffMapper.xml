@@ -17,9 +17,41 @@
         <result column="traffic" property="traffic" jdbcType="VARCHAR"/>
         <result column="role" property="role" jdbcType="VARCHAR"/>
         <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
-
-
+        <result column="consult_price" property="consultPrice" jdbcType="VARCHAR"/>
+        <result column="consult_class_id" property="consultClassId" jdbcType="BIGINT"/>
+        <result column="consult_city_id" property="consultCityId" jdbcType="BIGINT"/>
+        <result column="good_at_direction" property="goodAtDirection" jdbcType="VARCHAR"/>
+        <result column="consult_object" property="consultObject" jdbcType="VARCHAR"/>
     </resultMap>
+    <resultMap id="ConsultClassResultMap" type="com.study.admin.entities.ArticleClass">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="class_name" property="className" jdbcType="VARCHAR"/>
+    </resultMap>
+    <resultMap id="ConsultCityResultMap" type="com.study.admin.entities.ConsultCity">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="city" property="city" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <select id="getConsultCityALl" resultMap="ConsultCityResultMap">
+        select * from tb_consult_city
+    </select>
+    <select id="getConsultClassAll" resultMap="ConsultClassResultMap">
+        select * from tb_consult_class
+    </select>
+    <select id="getPsychologyNum" resultType="integer">
+        select count(*)
+        from  tb_psychology_order_question_history
+    </select>
+    <select id="getStaffNum" resultType="integer">
+        select count(*)
+        from  tb_staff
+    </select>
+    <select id="getConsultNum" resultType="integer">
+        select sum(traffic)  from tb_staff
+    </select>
+    <select id="getUserNum" resultType="integer">
+        select count(*) from tb_user;
+    </select>
     <select id="login" parameterType="string" resultMap="BaseResultMap">
         select * from tb_staff where account = #{account} and password = #{password};
     </select>
@@ -60,7 +92,22 @@
                 description=#{description},
             </if>
             <if test="role != null">
-                role=#{role}
+                role=#{role},
+            </if>
+            <if test="consultPrice != null">
+                consult_price=#{consultPrice},
+            </if>
+            <if test="consultClassId != null">
+                consult_class_id=#{consultClassId},
+            </if>
+            <if test="consultCityId != null">
+                consult_city_id=#{consultCityId},
+            </if>
+            <if test="goodAtDirection != null">
+                good_at_direction=#{goodAtDirection},
+            </if>
+            <if test="consultObject != null">
+                consult_object=#{consultObject}
             </if>
         </set>
             where id = #{id};
@@ -68,8 +115,8 @@
 
     </update>
     <insert id="addStaff" parameterType="com.study.admin.entities.Staff" useGeneratedKeys="true" keyProperty="id">
-        insert into tb_staff(staff_name,account,password,sex,phone,email,certificate,description,role)
-        values(#{staffName},#{account},#{password},#{sex},#{phone},#{email},#{certificate},#{description},#{role});
+        insert into tb_staff(staff_name,account,password,sex,phone,email,certificate,description,role,consult_price,consult_class_id,consult_city_id,good_at_direction,consult_object)
+        values(#{staffName},#{account},#{password},#{sex},#{phone},#{email},#{certificate},#{description},#{role},#{consultPrice},#{consultClassId},#{consultCityId},#{goodAtDirection},#{consultObject});
     </insert>
 
     <delete id="deleteStaff">
@@ -92,9 +139,9 @@
         select * from tb_staff;
     </select>
     <insert id="saveBatchStaff" parameterType="list">
-        insert into tb_staff (staff_name,account,password,sex,phone,email,certificate,description) values
+        insert into tb_staff (staff_name,account,password,sex,phone,email,certificate,description,role,consult_price,consult_class_id,consult_city_id,good_at_direction,consult_object) values
         <foreach collection="list" item="item" index="index" separator=",">
-            (#{item.staffName},#{item.account},#{item.password},#{item.sex},#{item.phone},#{item.email},#{item.certificate},#{item.description})
+            (#{item.staffName},#{item.account},#{item.password},#{item.sex},#{item.phone},#{item.email},#{item.certificate},#{item.description},#{item.role},#{item.consultPrice},#{item.consultClassId},#{item.consultCityId},#{item.goodAtDirection},#{item.consultObject})
         </foreach>
     </insert>
 

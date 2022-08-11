@@ -96,7 +96,7 @@ public class FilesController {
             return CommonResult.error();
         }
     }
-    //    彻底删除文件
+    //    删除文件
     @DeleteMapping(value = "/del/{id}")
     public CommonResult deleteFile(@PathVariable Integer id){
         Files files = filesService.findById(id);

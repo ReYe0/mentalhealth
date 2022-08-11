@@ -14,6 +14,8 @@ import java.util.List;
  */
 @Mapper
 public interface FilesDao {
+    //    彻底删除文件
+    public Integer deleteById(@Param("id")Integer id);
 //上传文件
     public Integer insert(Files files);
 //    查找数据库中是否存在该文件 根据md5

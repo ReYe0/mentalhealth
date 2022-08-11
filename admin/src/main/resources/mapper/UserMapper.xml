@@ -9,6 +9,8 @@
         <result column="account" property="account" jdbcType="VARCHAR"/>
         <result column="password" property="password" jdbcType="VARCHAR"/>
         <result column="avatar_url" property="avatarUrl" jdbcType="VARCHAR"/>
+        <result column="info" property="info" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="VARCHAR"/>
 
     </resultMap>
     <!--    useGeneratedKeys这个只在insert语句中有效，正常情况下useGeneratedKeys默认为false
@@ -17,7 +19,12 @@
     keyProperty 一般都是结合数据库自动生成主键来使用，由于是数据库生成的主键，
     所以在这个对象持久化到数据库之前是对象中的这个属性是没有属性值的，但是在持久化之后又想使用这个主键， 出现这样的情况时可以keyProperty="id"
     -->
-
+    <select id="selectTotal" resultType="integer">
+        select count(*) from tb_user where name like concat('%',#{name},'%')
+    </select>
+<select id="selectPage" resultMap="BaseResultMap">
+    select * from tb_user where name like concat('%',#{name},'%') order by create_time desc limit #{pageNum},#{pageSize} ;
+</select>
     <select id="login" parameterType="string" resultMap="BaseResultMap">
         select * from tb_user where account = #{account} and password = #{password};
     </select>

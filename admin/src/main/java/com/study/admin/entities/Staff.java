@@ -46,4 +46,14 @@ public class Staff {
     private String role;
     @Alias("入职时间")
     private Date createTime;
+    @Alias("咨询价格")
+    private String consultPrice;
+    @Alias("类别id")
+    private Integer consultClassId;
+    @Alias("所在地id")
+    private Integer consultCityId;
+    @Alias("擅长方向")
+    private String goodAtDirection;
+    @Alias("咨询对象")
+    private String consultObject;
 }
